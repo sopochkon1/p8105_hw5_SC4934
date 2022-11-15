@@ -84,4 +84,47 @@ tidy_df %>%
 The path shows bigger change in outcome (linear increase) in the experimental group than the control group, where the outcome stays relatively the same through the weeks. The plot also shows high within-subject correlation, meaning that the subjects that are above average at the beginning of the observation period are above average at the end of the study period, and vice versa. 
 
 
+## Problem 2 
+
+```{r}
+homicide = 
+read_csv(
+  "data/homicide-data.csv"
+) %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    city_state = str_c(city, ", ", state)
+  ) %>% 
+  group_by(city_state) %>% 
+  summarise(
+    homicide = n(),
+    unsolved = sum(disposition == "Closed without arrest" | disposition == "Open/No arrest")
+  ) 
+ 
+```
+
+
+### Prop.test Baltimore 
+
+```{r}
+Baltimore = 
+  homicide %>% 
+  filter(
+    city_state == "Baltimore, MD"
+  )
+  
+proptest = 
+  prop.test(
+    x = Baltimore %>% pull(unsolved), 
+    n = Baltimore %>% pull(homicide),
+    alternative = c("two.sided"),
+    conf.level = 0.95, correct = TRUE
+  ) %>% 
+  broom::tidy() %>% 
+  select(estimate, conf.low, conf.high) %>% 
+  knitr::kable(digits = 3)
+  
+
+```
+
 

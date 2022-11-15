@@ -417,6 +417,49 @@ average at the beginning of the observation period are above average at
 the end of the study period, and vice versa.</p>
 </div>
 </div>
+<div id="problem-2" class="section level2">
+<h2>Problem 2</h2>
+<pre class="r"><code>homicide = 
+read_csv(
+  &quot;data/homicide-data.csv&quot;
+) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  mutate(
+    city_state = str_c(city, &quot;, &quot;, state)
+  ) %&gt;% 
+  group_by(city_state) %&gt;% 
+  summarise(
+    homicide = n(),
+    unsolved = sum(disposition == &quot;Closed without arrest&quot; | disposition == &quot;Open/No arrest&quot;)
+  ) </code></pre>
+<pre><code>## Rows: 52179 Columns: 12
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (9): uid, victim_last, victim_first, victim_race, victim_age, victim_sex...
+## dbl (3): reported_date, lat, lon
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<div id="prop.test-baltimore" class="section level3">
+<h3>Prop.test Baltimore</h3>
+<pre class="r"><code>Baltimore = 
+  homicide %&gt;% 
+  filter(
+    city_state == &quot;Baltimore, MD&quot;
+  )
+  
+proptest = 
+  prop.test(
+    x = Baltimore %&gt;% pull(unsolved), 
+    n = Baltimore %&gt;% pull(homicide),
+    alternative = c(&quot;two.sided&quot;),
+    conf.level = 0.95, correct = TRUE
+  ) %&gt;% 
+  broom::tidy() %&gt;% 
+  select(estimate, conf.low, conf.high) %&gt;% 
+  knitr::kable(digits = 3)</code></pre>
+</div>
+</div>
 
 
 
