@@ -174,35 +174,107 @@ set.seed(1)
 ```
 
 
+
 ```{r}
-
-  sim_mean_sd = function(n = 30, mu, sigma = 5) {
-  
-  sim_data = tibble(
-    x = rnorm(n, mean = mu, sd = sigma),
-  )
-  
-  sim_data %>% 
-    summarize(
-      mu_hat = mean(x),
-      sigma_hat = sd(x)
-    )
-  }
-
-
-output = vector("list", 5000)
-
-for (i in 1:5000) {
-  output[[i]] = sim_mean_sd(mu = 0)
+sim_t_test = function(mu){
+sample = rnorm(30, mu, sd = 5)
+test_results = t.test(sample) %>% 
+  broom::tidy()
 }
 
-sim_results_0 = bind_rows(output)
 
-for (i in 1:5000) {
-  output[[i]] = sim_mean_sd(mu = 1)
-}
+# 5000 iterations when mu = 0
+sim_results_df_0 = 
+  expand_grid(
+    mu = 0,
+    iter = 1:5000
+  ) %>% 
+  mutate(
+    estimate_df = map(mu, sim_t_test)
+  ) %>% 
+  unnest(estimate_df)
 
-sim_results_1 = bind_rows(output)
+# Repeat for mu = 1 : 6
+
+sim_results_df = 
+  expand_grid(
+    mu = c(1:6),
+    iter = 1:5000
+  ) %>% 
+  mutate(
+    estimate_df = map(mu, sim_t_test)
+  ) %>% 
+  unnest(estimate_df)
 ```
+
+### Plot
+
+```{r}
+Power_vs_mu = 
+  sim_results_df %>% 
+  mutate(
+    status = ifelse(p.value < 0.05, TRUE, FALSE)
+  ) %>% 
+  group_by(mu) %>% 
+  summarise(power = sum(status)/5000) %>% 
+  ggplot(aes(x = mu, y = power)) +
+  geom_point(aes(color = mu)) +
+  geom_line(alpha = .5) +
+  labs(
+    title = "Power vs True Mean",
+    x = "True Mean",
+    y = "Power"
+  )
+```
+
+
+As observed in the above plot, the Power of the test increases as the true mean (mu) increases, Therefore, there is a positive association between the effect size and power.  
+
+### Second Plot
+
+Make a plot showing the average estimate of μ̂  on the y axis and the true value of μ on the x axis. Make a second plot (or overlay on the first) the average estimate of μ̂  only in samples for which the null was rejected on the y axis and the true value of μ on the x axis. Is the sample average of μ̂  across tests for which the null is rejected approximately equal to the true value of μ? Why or why not?
+
+
+```{r}
+all = 
+  sim_results_df %>% 
+  group_by(mu) %>% 
+  summarise(all_mean = mean(estimate)) %>% 
+  ggplot(aes(x = mu, y = all_mean)) +
+  geom_point(alpha = 0.5) +
+  geom_line()+
+  labs(
+    title = "Average of μ^ vs true value ",
+    x = "True Value of μ",
+    y = "Average estimate of μ^"
+  )
+
+
+reject = 
+  sim_results_df %>%
+  mutate(
+    status = ifelse(p.value < 0.05, TRUE, FALSE)
+  ) %>% 
+  group_by(mu) %>% 
+  filter(status == TRUE) %>% 
+  summarise(reject_mean = mean(estimate)) %>% 
+  ggplot(aes(x = mu, y = reject_mean)) +
+  geom_point(alpha = 0.5) +
+  geom_line() +
+  labs(
+    title = "Average of μ^ in rejected null vs true value ",
+    x = "True Value of μ",
+    y = "Average estimate of μ^"
+  )
+
+
+```
+
+
+
+
+
+
+
 
 
