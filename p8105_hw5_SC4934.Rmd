@@ -10,6 +10,7 @@ output: html_document
 library(tidyverse)
 library(p8105.datasets)
 library(viridis)
+library(rvest)
 
 knitr::opts_chunk$set(
 	echo = TRUE,
@@ -93,8 +94,8 @@ read_csv(
 ) %>% 
   janitor::clean_names() %>% 
   mutate(
-    city_state = str_c(city, ", ", state)
-  ) %>% 
+    state = case_when(city == "Tulsa" ~ "OK", TRUE ~ as.character(state)),
+    city_state = str_c(city, ", ", state)) %>% 
   group_by(city_state) %>% 
   summarise(
     homicide = n(),
@@ -102,7 +103,6 @@ read_csv(
   ) 
  
 ```
-
 
 ### Prop.test Baltimore 
 
@@ -174,5 +174,35 @@ set.seed(1)
 ```
 
 
+```{r}
+
+  sim_mean_sd = function(n = 30, mu, sigma = 5) {
+  
+  sim_data = tibble(
+    x = rnorm(n, mean = mu, sd = sigma),
+  )
+  
+  sim_data %>% 
+    summarize(
+      mu_hat = mean(x),
+      sigma_hat = sd(x)
+    )
+  }
+
+
+output = vector("list", 5000)
+
+for (i in 1:5000) {
+  output[[i]] = sim_mean_sd(mu = 0)
+}
+
+sim_results_0 = bind_rows(output)
+
+for (i in 1:5000) {
+  output[[i]] = sim_mean_sd(mu = 1)
+}
+
+sim_results_1 = bind_rows(output)
+```
 
 
