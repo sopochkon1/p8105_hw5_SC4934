@@ -86,7 +86,7 @@ The path shows bigger change in outcome (linear increase) in the experimental gr
 
 
 ## Problem 2 
-```{r}
+```{r results = "hide", message = FALSE}
 homicide = 
 read_csv(
   "data/homicide-data.csv"
@@ -240,7 +240,7 @@ Power_vs_mu =
   )
 ```
 
-As observed in the above plot, the Power of the test increases as the true mean (mu) increases, Therefore, there is a positive association between the effect size and power.  
+As observed in the above plot, the Power of the test increases as the true mean (mu) increases, therefore, there is a positive association between the effect size and power.  
 
 ### Second Plot
 

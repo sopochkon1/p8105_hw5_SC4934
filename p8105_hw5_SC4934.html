@@ -432,14 +432,6 @@ read_csv(
     homicide = n(),
     unsolved = sum(disposition == &quot;Closed without arrest&quot; | disposition == &quot;Open/No arrest&quot;)
   ) </code></pre>
-<pre><code>## Rows: 52179 Columns: 12
-## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## chr (9): uid, victim_last, victim_first, victim_race, victim_age, victim_sex...
-## dbl (3): reported_date, lat, lon
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <p>The <code>homicide</code> dataset includes information on homicide
 vicitms in 50 US cities. There are 3 columns and 50 rows in the dataset,
 with variables such as <code>victim_last</code>,
@@ -564,7 +556,7 @@ sim_results_df =
     y = &quot;Power&quot;
   )</code></pre>
 <p>As observed in the above plot, the Power of the test increases as the
-true mean (mu) increases, Therefore, there is a positive association
+true mean (mu) increases, therefore, there is a positive association
 between the effect size and power.</p>
 </div>
 <div id="second-plot" class="section level3">
