@@ -86,7 +86,6 @@ The path shows bigger change in outcome (linear increase) in the experimental gr
 
 
 ## Problem 2 
-
 ```{r}
 homicide = 
 read_csv(
@@ -103,6 +102,13 @@ read_csv(
   ) 
  
 ```
+
+The `homicide` dataset includes information on homicide vicitms in 50 US cities. There are 
+`r ncol(homicide)` columns and `r nrow(homicide)` rows in the dataset, with variables such as 
+`victim_last`, `victim_first`, `city`, `state`, `lat`, `lon`, etc. 
+
+There appeared to be a mistake in the data where Tulsa, OK was input as Tulsa, AL, making the number of cities 51 instead of 50. As part of tidying the dataset I changed the state variable 
+from AL to OK, before combining `city` and `state` into `city_state`, which corrected the error. 
 
 ### Prop.test Baltimore 
 
@@ -171,11 +177,7 @@ each_city %>%
 
 ```{r}
 set.seed(1)
-```
 
-
-
-```{r}
 sim_t_test = function(mu){
 sample = rnorm(30, mu, sd = 5)
 test_results = t.test(sample) %>% 
@@ -196,9 +198,20 @@ sim_results_df_0 =
 
 # Repeat for mu = 1 : 6
 
-sim_results_df = 
+sim_results_df_1to6 = 
   expand_grid(
     mu = c(1:6),
+    iter = 1:5000
+  ) %>% 
+  mutate(
+    estimate_df = map(mu, sim_t_test)
+  ) %>% 
+  unnest(estimate_df)
+
+# Final repeat for mu = 0 : 6
+sim_results_df = 
+  expand_grid(
+    mu = c(0:6),
     iter = 1:5000
   ) %>% 
   mutate(
@@ -227,13 +240,9 @@ Power_vs_mu =
   )
 ```
 
-
 As observed in the above plot, the Power of the test increases as the true mean (mu) increases, Therefore, there is a positive association between the effect size and power.  
 
 ### Second Plot
-
-Make a plot showing the average estimate of μ̂  on the y axis and the true value of μ on the x axis. Make a second plot (or overlay on the first) the average estimate of μ̂  only in samples for which the null was rejected on the y axis and the true value of μ on the x axis. Is the sample average of μ̂  across tests for which the null is rejected approximately equal to the true value of μ? Why or why not?
-
 
 ```{r}
 all = 
@@ -267,10 +276,13 @@ reject =
     y = "Average estimate of μ^"
   )
 
+# Plots: 
+all
+reject
 
 ```
 
-
+The sample average of μ̂  across tests for which the null is rejected does not match the  true value of μ, especially when there is low power. This could be because if you only look at results that reject the null, so only significant results, those results will not match the true value of  μ. This is especially true with low power or low sample size.   
 
 
 
