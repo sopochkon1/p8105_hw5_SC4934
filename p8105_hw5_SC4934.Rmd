@@ -121,10 +121,58 @@ proptest =
     conf.level = 0.95, correct = TRUE
   ) %>% 
   broom::tidy() %>% 
-  select(estimate, conf.low, conf.high) %>% 
-  knitr::kable(digits = 3)
+  select(estimate, conf.low, conf.high) 
   
 
 ```
+
+
+### For each city 
+
+```{r}
+
+each_city = 
+  homicide %>% mutate(
+   newcol = purrr::map2(unsolved, homicide, prop.test),
+   estimate = map_dbl(newcol, ~ .x[["estimate"]]),
+   CI = map(newcol, ~as.numeric(.x[["conf.int"]]))
+  ) %>% 
+  separate(CI, into = c("conf.low", "conf.high"), sep = ", ") %>% 
+  mutate(
+    conf.low = str_sub(conf.low, 3, 11),
+    conf.high = str_sub(conf.high, 1, 9),
+    ) %>% 
+  select(
+    city_state, estimate, conf.low, conf.high
+  ) 
+
+
+```
+
+### Plot
+
+```{r}
+each_city %>% 
+  mutate(city_state = fct_reorder(city_state, estimate)) %>% 
+  ggplot(aes(x = city_state, y = estimate, color = city_state)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = as.numeric(conf.low), ymax = as.numeric(conf.high))) +
+  labs(
+    x = "City, State",
+    y = "Estimate (CI)",
+    title = "Proportion per City"
+  ) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(legend.position = "none")
+```
+
+
+## Problem 3
+
+```{r}
+set.seed(1)
+```
+
+
 
 
